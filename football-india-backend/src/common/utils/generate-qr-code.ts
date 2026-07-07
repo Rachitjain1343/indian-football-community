@@ -1,0 +1,2 @@
+export const generateQrCode = async () => '';
+

@@ -1,0 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.slugify = void 0;
+const slugify = (value) => value.toLowerCase().trim().replace(/\s+/g, '-');
+exports.slugify = slugify;
+//# sourceMappingURL=slugify.js.map

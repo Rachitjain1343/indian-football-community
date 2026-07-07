@@ -1,0 +1,1 @@
+-- seed national teams
