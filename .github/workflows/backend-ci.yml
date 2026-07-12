@@ -1,0 +1,22 @@
+name: Backend CI
+on:
+  push:
+    paths: ['football-india-backend/**']
+  pull_request:
+    paths: ['football-india-backend/**']
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: football-india-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: football-india-backend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:e2e -- --runInBand

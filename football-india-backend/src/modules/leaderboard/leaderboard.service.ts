@@ -1,2 +1,2 @@
-export class LeaderboardService {}
+import{BadRequestException,Inject,Injectable}from'@nestjs/common';import{SupabaseClient}from'@supabase/supabase-js';import{SUPABASE_ADMIN_CLIENT}from'../../database/supabase.client';@Injectable()export class LeaderboardService{constructor(@Inject(SUPABASE_ADMIN_CLIENT)private db:SupabaseClient){}async list(q:any){let r=this.db.from('leaderboard').select('*,club:clubs(*)').order(q.sort||'points',{ascending:false});if(q.season)r=r.eq('season',q.season);const{data,error}=await r;if(error)throw new BadRequestException(error.message);return data}async compare(ids:string[]){const{data,error}=await this.db.from('leaderboard').select('*,club:clubs(*)').in('club_id',ids);if(error)throw new BadRequestException(error.message);return data}}
 

@@ -22,13 +22,22 @@ import { BadgesModule } from './modules/badges/badges.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { DatabaseModule } from './database/database.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { HealthController } from './health.controller';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: validateEnv,
     }),
+    DatabaseModule,
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     AuthModule,
     UsersModule,
     FanProfilesModule,
@@ -52,7 +61,7 @@ import { AdminModule } from './modules/admin/admin.module';
     UploadsModule,
     AdminModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}

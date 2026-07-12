@@ -1,2 +1,3 @@
-export class NationalTeamsController {}
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'; import { Public } from '../../common/decorators/public.decorator'; import { Roles } from '../../common/decorators/roles.decorator'; import { RolesGuard } from '../../common/guards/roles.guard'; import { NationalTeamsService } from './national-teams.service';
+@Controller('national-teams') @UseGuards(RolesGuard) export class NationalTeamsController { constructor(private s: NationalTeamsService) {} @Public() @Get() all(@Query() q:any){return this.s.findAll(q)} @Public() @Get(':id') one(@Param('id') id:string){return this.s.findOne(id)} @Roles('admin') @Post() create(@Body() b:any){return this.s.create(b)} @Roles('admin') @Patch(':id') update(@Param('id') id:string,@Body() b:any){return this.s.update(id,b)} @Roles('admin') @Delete(':id') remove(@Param('id') id:string){return this.s.remove(id)} }
 

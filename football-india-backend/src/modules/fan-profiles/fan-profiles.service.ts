@@ -47,6 +47,13 @@ export class FanProfilesService {
     return data;
   }
 
+  async findByUserId(userId: string) {
+    const { data, error } = await this.supabase.from('fan_profiles').select('*').eq('user_id', userId).maybeSingle();
+    if (error) throw new InternalServerErrorException(error.message);
+    if (!data) throw new NotFoundException('Fan profile not found');
+    return data;
+  }
+
   async create(createFanProfileDto: CreateFanProfileDto) {
     const payload = {
       user_id: createFanProfileDto.userId,
@@ -129,4 +136,6 @@ export class FanProfilesService {
 
     return data;
   }
+
+  async updateByUserId(userId: string, dto: UpdateFanProfileDto) { const profile = await this.findByUserId(userId); return this.update(profile.id, dto); }
 }

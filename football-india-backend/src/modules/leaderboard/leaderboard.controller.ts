@@ -1,2 +1,2 @@
-export class LeaderboardController {}
+import{Controller,Get,Query}from'@nestjs/common';import{Public}from'../../common/decorators/public.decorator';import{LeaderboardService}from'./leaderboard.service';@Controller('leaderboard')export class LeaderboardController{constructor(private s:LeaderboardService){}@Public()@Get()list(@Query()q:any){return this.s.list(q)}@Public()@Get('compare')compare(@Query('ids')ids:string){return this.s.compare((ids||'').split(',').filter(Boolean))}}
 

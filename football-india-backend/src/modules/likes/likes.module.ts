@@ -1,4 +1,4 @@
 import { Module } from '@nestjs/common';
 
-@Module({})
+import{LikesController}from'./likes.controller';import{LikesService}from'./likes.service';@Module({controllers:[LikesController],providers:[LikesService]})
 export class LikesModule {}

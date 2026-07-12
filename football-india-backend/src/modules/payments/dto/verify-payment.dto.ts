@@ -1,1 +1,1 @@
-export class VerifyPaymentDto {}
+import { IsString, MinLength } from 'class-validator'; export class VerifyPaymentDto { @IsString() @MinLength(3) razorpayOrderId!: string; @IsString() @MinLength(3) razorpayPaymentId!: string; @IsString() @MinLength(32) signature!: string }

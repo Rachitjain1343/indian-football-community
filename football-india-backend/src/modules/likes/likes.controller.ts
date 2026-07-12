@@ -1,1 +1,1 @@
-export class LikesController {}
+import{Controller,Get,Param,Post}from'@nestjs/common';import{CurrentUser,AuthUser}from'../../common/decorators/current-user.decorator';import{LikesService}from'./likes.service';@Controller('likes')export class LikesController{constructor(private s:LikesService){}@Post(':blogId')toggle(@CurrentUser()u:AuthUser,@Param('blogId')id:string){return this.s.toggle(u.id,id)}@Get(':blogId')status(@CurrentUser()u:AuthUser,@Param('blogId')id:string){return this.s.status(u.id,id)}}

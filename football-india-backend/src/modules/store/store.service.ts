@@ -1,1 +1,2 @@
-export class StoreService {}
+import{Inject,Injectable}from'@nestjs/common';import{SupabaseClient}from'@supabase/supabase-js';import{SUPABASE_ADMIN_CLIENT}from'../../database/supabase.client';import{SupabaseCrudService}from'../../common/services/supabase-crud.service';
+@Injectable()export class StoreService extends SupabaseCrudService{constructor(@Inject(SUPABASE_ADMIN_CLIENT)db:SupabaseClient){super(db,'products')}categories(){return this.db.from('product_categories').select('*').order('name').then(r=>{this.fail(r.error);return r.data})}createCategory(b:any){return this.db.from('product_categories').insert(b).select().single().then(r=>{this.fail(r.error);return r.data})}}

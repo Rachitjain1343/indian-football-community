@@ -1,0 +1,9 @@
+football-india-test-frontend/node_modules/
+football-india-test-frontend/dist/
+football-india-test-frontend/.env
+football-india-test-frontend/*.log
+football-india-backend/node_modules/
+football-india-backend/dist/
+football-india-backend/.env
+football-india-backend/server.log
+football-india-backend/server.err
