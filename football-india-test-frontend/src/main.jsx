@@ -11,6 +11,7 @@ const state = {
   message: '',
   authMode: 'login',
 };
+let refreshInFlight = null;
 
 const routes = {
   '#/': renderHome,
@@ -42,9 +43,7 @@ function readJson(key) {
 
 async function api(path, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
-  const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}) };
   const token = localStorage.getItem('ifc_access_token');
-  if (token) headers.Authorization = `Bearer ${token}`;
   const cacheKey = method === 'GET' ? `${path}::${token || 'anon'}` : null;
 
   if (cacheKey) {
@@ -54,15 +53,22 @@ async function api(path, options = {}) {
     }
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    method,
-    headers,
-    body: options.body && typeof options.body !== 'string' ? JSON.stringify(options.body) : options.body,
-  });
-  const data = response.status === 204 ? null : await response.json().catch(() => null);
+  let { response, data } = await request(path, options, token);
+
+  if (response.status === 401 && token && path !== '/auth/login' && path !== '/auth/register' && path !== '/auth/refresh') {
+    const refreshed = await refreshSession();
+    if (refreshed) {
+      const retry = await request(path, options, localStorage.getItem('ifc_access_token'));
+      response = retry.response;
+      data = retry.data;
+    }
+  }
+
   if (!response.ok) {
     const message = Array.isArray(data?.message) ? data.message.join(', ') : data?.message;
+    if (response.status === 401 && localStorage.getItem('ifc_access_token')) {
+      handleAuthExpired();
+    }
     throw new Error(message || `Request failed (${response.status})`);
   }
 
@@ -73,6 +79,43 @@ async function api(path, options = {}) {
   }
 
   return data;
+}
+
+async function request(path, options, token) {
+  const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    method: (options.method || 'GET').toUpperCase(),
+    headers,
+    body: options.body && typeof options.body !== 'string' ? JSON.stringify(options.body) : options.body,
+  });
+
+  const data = response.status === 204 ? null : await response.json().catch(() => null);
+  return { response, data };
+}
+
+async function refreshSession() {
+  const refreshToken = localStorage.getItem('ifc_refresh_token');
+  if (!refreshToken) return false;
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    const { response, data } = await request('/auth/refresh', { method: 'POST', body: { refreshToken } });
+    if (!response.ok || !data?.session) {
+      handleAuthExpired();
+      return false;
+    }
+    setSession(data);
+    return true;
+  })();
+
+  try {
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
+  }
 }
 
 function collection(payload) {
@@ -108,6 +151,15 @@ function setSession(payload) {
 
   state.user = user;
   responseCache.clear();
+}
+
+function handleAuthExpired() {
+  setSession(null);
+  if (location.hash === '#/account') {
+    location.hash = '#/auth';
+  } else {
+    render();
+  }
 }
 
 function layout(content) {
