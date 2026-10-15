@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "description": "Backend scaffold for the Indian Football Community platform.",
   "private": true,
+   "engines": {
+    "node": ">=22.0.0"
   "scripts": {
     "build": "nest build",
     "start": "nest start",
